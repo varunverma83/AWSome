@@ -55,6 +55,7 @@ def snapshotInstanceVolumes(profile, region, account):
 	instances = ec2.instances.filter(Filters=filter)
 	total_instances = sum(1 for i in instances)
 	print 'Total instances: %s' % total_instances
+	maxInstancesToBackup = (total_instances / CONST_BKP_FREQUENCY) + 1
 	instances_snapshotted = 0
 	for i in instances:
 		sl = SnapshotLog()
@@ -67,7 +68,7 @@ def snapshotInstanceVolumes(profile, region, account):
 		if i_last_ss_time and (i_last_ss_time > ss_cutoff_time):
 			print 'Snapshot taken recently on %s. Ignoring instance %s (%s)' % (i_last_ss_time, i_name, i.instance_id)
 			continue
-		if instances_snapshotted > CONST_BKP_FREQUENCY:
+		if instances_snapshotted > maxInstancesToBackup:
 			break
 		i_backup_start_time = datetime.today()
 		i_id = i.instance_id
